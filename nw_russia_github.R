@@ -1,15 +1,19 @@
 ###########################################################
 #                                                         #
 #                                                         #
-#      Supplementary Code for Article:Russian             #
-#      Domestic Media Propaganda Targeting Western        #
-#      COVID-19 Vaccines and Its Spillover Effects on     #
-#      Russian COVID-19 Vaccine Hesitancy                 #
+#      Supplementary Code for Article:                    #
+#      Social Mediated News about Foreign COVID-19        #
+#      Vaccination and Vaccine Hesitancy in Russia        #
+#                                                         #
 #      Authors: Erik Nisbet, Olga Kamenchuk &             #
 #               Ayse Lokmanoglu                           #
 #      Code Author: Ayse Lokmanoglu                       #  
 ###########################################################
 
+#########################################################
+######### Step 1 Retrieval of articles from NewsWhip API
+#########################################################
+#########################################################
 
 # load libraries
 library(httr)
@@ -44,14 +48,6 @@ library(scales)
 # variables to change #
 #######################
 
-# below is the variable that needs to be changed
-# the only change that needs to be made is the
-# date in the format 'YYYY-MM-DD'
-# the date should be the date of the start of the 
-# period of observation
-
-#starting_date <- '2021-07-01'
-
 # below is the variable that needs to be changed if
 # we want to change the number of articles that will be
 # returned by the query
@@ -59,10 +55,8 @@ library(scales)
 
 num_articles <- 5000
 
-
-###############################################
-# everything below can be run without changes #
-###############################################
+# date range YYYY-MM-DD
+days<-as.character(as.Date(as.Date("2021-05-01"):as.Date("2021-12-31"), origin="1970-01-01"))
 
 ###########################################
 # calling the newship API to get articles #
@@ -77,7 +71,6 @@ num_articles <- 5000
 # create a variable that tells the API where to go
 # this is from the NewsWhip help file
 api_endpoint <- paste0('https://api.newswhip.com/v1/articles?key=', api_key)
-
 
 # make a function to get articles matching a given query
 # the function below creates a query based on the parameters:
@@ -103,7 +96,7 @@ get_newswhip_articles <- function(api_key, limit, start_time, end_time) {
   jsonlite::fromJSON(httr::content(r, "text", encoding = "UTF-8"), flatten = TRUE)$articles          
 }
 
-days<-as.character(as.Date(as.Date("2021-05-01"):as.Date("2021-12-31"), origin="1970-01-01"))
+######the loop for date range
 
 mylist <- list()
 for (i in days) {
@@ -172,7 +165,10 @@ openxlsx::write.xlsx(data_Russia_Vaccine_21, file = paste("CSVandExcel/COVID_New
 ##save as RDA
 save(data_Russia_Vaccine_21, file = paste("RDA/COVID_NewsWhip_RU_Vaccine_starting_", gsub("-", "_", starting_date), "_N_", total_num_articles, ".Rda", sep=""))
 
-###some descriptives
+#########################################################
+######### Step 2 Descriptives of Retrieved Content
+#########################################################
+#########################################################
 ##just domains
 test<- data_Russia_Vaccine_21 %>% count(source.domain)
 write.csv(test, "CSVandEXCEL/Russia_Vaccine_Domain_List.csv")
@@ -210,6 +206,10 @@ data_filtered <- data_Russia_Vaccine_21 %>%
 openxlsx::write.xlsx(data_filtered, file = "CSVandExcel/Russia_Vaccine_Scrape.xlsx", rowNames=F)
 ##save as RDA
 save(data_filtered, file = "RDA/Russia_Vaccine_Scrape.Rda")
+
+##############################################
+####Visualization 1###########################
+##############################################
 
 ##########Graph engagement and daily article volume
 data_filtered_long<-data_filtered %>%
@@ -256,8 +256,17 @@ ggplot(data_filtered_long, aes(x=date, y=sum)) +
         legend.box.background = element_blank())
 ggsave("Visuals/Figure1_Article_Engagement_Volume_061322.tiff", width=8.5, height=5, dpi=300)
 
-
+#########################################################
+######### Step 3 Python Scraping
+#########################################################
+#########################################################
 ###submit to python for scraping
+### refer to Python Script for scraping 
+#########################################################
+######### Step 4 Text Analysis
+#########################################################
+#########################################################
+
 ###download python scrapes
 dfmaster2 <- readr::read_csv("CSVandExcel/my_scraped_articles_master_FV.csv")
 dfmaster <- readr::read_csv("CSVandExcel/my_scraped_articles_russian_master_v1.csv")
@@ -691,6 +700,11 @@ rm(list = ls())
 # 
 # save(meta_theta_df2, file="NewswhipRU/Russia_Vaccine_Master_MetaThetaDF_k80_051622.Rda")
 
+#########################################################
+######### Step 5 ANTMN (Walter and Ophir, 2019)
+#########################################################
+#########################################################
+
 ########################################################
 ########################################################
 ###############ANTMN for russia Vaccines
@@ -835,6 +849,12 @@ meta_theta_df_comm$PurpleCom4<-rowSums(meta_theta_df_comm[,(as.numeric(V(mynewne
 save(meta_theta_df_comm, file="RDA/NW_Covid_K60_Meta_DF_Comm_SpinGlass_060822.Rda")
 
 #################ANTMN complete#####################
+
+#########################################################
+######### Step 6 Sentiment Analysis
+#########################################################
+#########################################################
+
 ######################################################
 #######run sentiment on each topic for k60###############
 ############Sentiment Analysis##########################
@@ -1158,6 +1178,11 @@ temp1<-inner_join(temp1, sentbyday, by="Group.1")
 colnames(temp1)[1]<-"date"
 save(temp1,file="NewswhipRU/Russia_k60_sentiment_byday_060922.Rda")
 
+#########################################################
+######### Step 7 DV and IVS
+#########################################################
+#########################################################
+
 ####Create DV and IVS
 ##load Russia_k60_each_topic_gamma_sentiment for ANTMN and Latest Date
 load("~/NewsWhip/Newswhip/Russia/domain_nw/RDA/Russia_k60_each_topic_gamma_sentiment_060922.Rda")
@@ -1250,6 +1275,10 @@ vtable::sumtable(temp_DV_IV)
 vtable::sumtable(eng_DV_IV)
 vtable::sumtable(eng_v2_DV_IV)
 
+########################################################
+########    Visualization 2             ################
+########################################################
+
 ###do a scatter temp_test
 fb<- temp_test3 %>%
   rowwise() %>%
@@ -1279,6 +1308,11 @@ ggplot(fb, aes(x=date, y=engagement)) +
         legend.background = element_rect(fill=NA),
         legend.box.background = element_blank())
 ggsave("visuals/Engagement_Scatter_052022.tiff", width=8.5, height=5, dpi=300)
+
+#########################################################
+######### Step 8 Time Series Analysis
+#########################################################
+#########################################################
 
 ###########################################################
 ###########################################################
@@ -1456,6 +1490,10 @@ tab_model(varcomm3.1G, varcomm3.2G, varcomm3.3G,
           show.se = TRUE,
           collapse.ci = TRUE,
           digits = 5)
+
+#######################################################
+##############  Visualization 3        ################
+#######################################################
 
 
 #### Graph the IRF functions
