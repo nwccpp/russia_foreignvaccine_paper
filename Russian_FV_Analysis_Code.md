@@ -13,7 +13,7 @@ knitr::opts_chunk$set(eval = FALSE)
 ```
 ### Supplementary Code for:
 ### 
-#### Authors: Erik Nisbet, PhD; Ayse D. Lokmanoglu, PhD; and Olga Kamenchuk, PhD
+#### Authors: Erik Nisbet, PhD; Olga Kamenchuk, PhD; and Ayse D. Lokmanoglu, PhD
 
 ***Due to our terms of agreement of NewsWhip API, we will not provide individual level information of articles, only aggregate date.***
 
@@ -723,8 +723,11 @@ save(temp_by_day_wt,file="Russia_FV_k65_WT_IV_DATE.Rda")
 ```
 2. Create the depedent variables, retrieving them from retrieved from the API of The Global COVID-19 Trends and Impact Survey Open Data API [Fan et al., 2020a](https://gisumd.github.io/COVID-19-API-Documentation/). 
 ```{r}
-## Load from harvard dataverse
-#UMDIndicatorsRussia_pct_vu_v2$date<- mdy(UMDIndicatorsRussia_pct_vu_v2$date)
+## Load UMD data
+temp_DV <- read.csv("https://raw.githubusercontent.com/nwccpp/russia_foreignvaccine_paper/main/datasets/UMD_for_Publication_Russia.csv")
+temp_DV <- temp_DV %>%
+  dplyr::select(-X) %>%
+  mutate(date=ymd(date))
 summary(temp_DV$pct_vu)
 summary(temp_DV$pct_cse)
 ```
@@ -734,7 +737,7 @@ temp_DV_IV_wt<-left_join(temp_by_day_wt, temp_DV, by="date")
 
 temp_DV_IV_wt<-temp_DV_IV_wt %>%
   filter(date>'2021-05-19')
-save(temp_DV_IV_wt,file="Russia_Fv_k65_WT_IV_DV_DATE.Rda")
+#save(temp_DV_IV_wt,file="Russia_Fv_k65_WT_IV_DV_DATE.Rda")
 
 ## Look at the descriptives
 vtable::sumtable(temp_DV_IV_wt)
@@ -761,7 +764,11 @@ library(scales)
 ```
 2. Load the dataset
 ```{r}
-## Harvard dataverse link
+temp_DV_IV_wt <- read.csv("https://raw.githubusercontent.com/nwccpp/russia_foreignvaccine_paper/main/datasets/Russia_Fv_k65_WT_IV_DV_071222.csv")
+### remove the X that comes with loading CSV and change date to date
+temp_DV_IV_wt <- temp_DV_IV_wt %>%
+  dplyr::select(-X) %>%
+  mutate(date=ymd(date))
 ```
 3. Create descriptive statistics
 ```{r}
@@ -777,9 +784,7 @@ temp_DV_IV_wt %>% dplyr::select(
                                 trust_LighBlueCom3,
                                 pct_vu,
                                 pct_cse) %>%
-  vtable::sumtable(summ=c('notNA(x)', 'mean(x)', 'sd(x)', 'var(x)', 'min(x)','max(x)'),
-                   out='csv', 
-                   file="Russia_Fv_k65_WT_IVaDV_Desc_DATE.csv")
+  vtable::sumtable(summ=c('notNA(x)', 'mean(x)', 'sd(x)', 'var(x)', 'min(x)','max(x)'))
 ```
 4. Run time series models, with AIC and stationary tests for Vaccine Acceptance
 ```{r}
