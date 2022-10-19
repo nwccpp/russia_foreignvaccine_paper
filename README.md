@@ -10,4 +10,4 @@ Following files are in the repository:
 
 For questions, or more information on the code please contact: 
 Ayse D. Lokmanoglu\
-ayse [dot] lokmanoglu [at] nortwestern [dot] edu
+ayse [dot] lokmanoglu [at] northwestern [dot] edu
